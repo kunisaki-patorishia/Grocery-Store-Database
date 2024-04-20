@@ -296,6 +296,5 @@ void displayInventory(struct item *head) {
         current = current->next;
     }
 }
-c
 
 
