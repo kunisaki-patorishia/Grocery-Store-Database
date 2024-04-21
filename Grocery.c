@@ -12,18 +12,19 @@ struct item {
 };
 
 // Function prototypes
-void loadDatabase(struct item **head, char *filename);
+void loadDatabase(struct item **head, char *filename, int *saveFlag);
 void saveDatabase(struct item *head, char *filename);
-void displayMenu(struct item **head);
-void addItem(struct item **head);
-void deleteItem(struct item **head);
-void changeCost(struct item *head);
+void displayMenu(struct item **head, int *saveFlag);
+void addItem(struct item **head, int *saveFlag);
+void deleteItem(struct item **head, int *saveFlag);
+void changeCost(struct item *head, int *saveFlag);
 void searchItem(struct item *head);
 void displayInventory(struct item *head);
 
 int main(void) {
     // Initialize the head pointer for the linked list
     struct item *head = NULL;
+    int saveFlag = 0; // Initialize save flag to false
 
     // Ask the user for the filename containing the database
     FILE *file;
@@ -53,10 +54,10 @@ int main(void) {
     }
 
     // Load the database from the file
-    loadDatabase(&head, filename);
+    loadDatabase(&head, filename, &saveFlag);
 
     // Display the menu and perform actions based on user input
-    displayMenu(&head);
+    displayMenu(&head, &saveFlag);
 
     // Free dynamically allocated memory before exiting
     // (if needed)
@@ -65,7 +66,7 @@ int main(void) {
 }
 
 // Function to load the database from a file
-void loadDatabase(struct item **head, char *filename) {
+void loadDatabase(struct item **head, char *filename, int *saveFlag) {
     // Implement this function to read data from the file
     // and create a linked list of items
 
@@ -105,6 +106,8 @@ void loadDatabase(struct item **head, char *filename) {
 
     fclose(file);
 
+    // Database loaded, set save flag to false
+    *saveFlag = 0;
 }
 
 // Function to save the database to a file
@@ -127,7 +130,7 @@ void saveDatabase(struct item *head, char *filename) {
 }
 
 // Function to display the main menu and handle user input
-void displayMenu(struct item **head) {
+void displayMenu(struct item **head, int *saveFlag) {
     // Implement this function to display the menu and
     // call corresponding functions based on user input
 
@@ -145,13 +148,13 @@ void displayMenu(struct item **head) {
 
         switch (choice) {
             case 1:
-                addItem(head);
+                addItem(head, saveFlag);
                 break;
             case 2:
-                deleteItem(head);
+                deleteItem(head, saveFlag);
                 break;
             case 3:
-                changeCost(*head);
+                changeCost(*head, saveFlag);
                 break;
             case 4:
                 searchItem(*head);
@@ -161,6 +164,19 @@ void displayMenu(struct item **head) {
                 break;
             case 6:
                 printf("Exiting program.\n");
+                // Check if changes have been made to the database
+                if (*saveFlag) {
+                    char saveChoice;
+                    printf("Save changes to the database? (Y/N): ");
+                    scanf(" %c", &saveChoice);
+                    if (saveChoice == 'Y' || saveChoice == 'y') {
+                        char newFilename[50];
+                        printf("Enter the filename to save the changes: ");
+                        scanf("%s", newFilename);
+                        saveDatabase(*head, newFilename);
+                        printf("Changes saved to %s successfully.\n", newFilename);
+                    }
+                }
                 break;
             default:
                 printf("Invalid choice. Please try again.\n");
@@ -168,8 +184,9 @@ void displayMenu(struct item **head) {
     } while (choice != 6);
 }
 
+
 // Function to add a new item to the database
-void addItem(struct item **head) {
+void addItem(struct item **head, int *saveFlag) {
     // Implement this function to add a new item to the
     // linked list
     struct item *newItem = (struct item*)malloc(sizeof(struct item));
@@ -206,14 +223,15 @@ void addItem(struct item **head) {
 
     printf("Item added successfully.\n");
 
+    // Set save flag to true
+    *saveFlag = 1;
 }
 
+
 // Function to delete an item from the database
-void deleteItem(struct item **head) {
+void deleteItem(struct item **head, int *saveFlag) {
     // Implement this function to delete an item from the
     // linked list
-
-
     int id;
     printf("Enter the ID number of the item to delete: ");
     scanf("%d", &id);
@@ -240,10 +258,13 @@ void deleteItem(struct item **head) {
     free(current);
     printf("Item with ID %d deleted successfully.\n", id);
 
+    // Set save flag to true
+    *saveFlag = 1;
 }
 
+
 // Function to change the cost of an existing item
-void changeCost(struct item *head) {
+void changeCost(struct item *head, int *saveFlag) {
     // Implement this function to change the cost of an
     // existing item in the linked list
     int id;
@@ -265,7 +286,8 @@ void changeCost(struct item *head) {
 
     printf("Cost for item with ID %d changed successfully.\n", id);
 
-
+    // Set save flag to true
+    *saveFlag = 1;
 }
 
 // Function to search for an item in the database
@@ -306,3 +328,4 @@ void displayInventory(struct item *head) {
         current = current->next;
     }
 }
+
