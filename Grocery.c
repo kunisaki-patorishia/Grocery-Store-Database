@@ -33,12 +33,24 @@ int main(void) {
 
     file = fopen(filename, "r+"); // Open file in read/write mode
     if (file == NULL) {
-        printf("Error opening file '%s'.\n", filename);
-        perror("Error");
-        exit(EXIT_FAILURE);
+        char createNew;
+        printf("File '%s' does not exist. Do you want to create a new file? (Y/N): ", filename);
+        scanf(" %c", &createNew);
+        if (createNew == 'Y' || createNew == 'y') {
+            file = fopen(filename, "w+");
+            if (file == NULL) {
+                printf("Error creating file '%s'.\n", filename);
+                perror("Error");
+                exit(EXIT_FAILURE);
+            }
+            printf("New file '%s' created successfully.\n", filename);
+        } else {
+            printf("Exiting program.\n");
+            exit(EXIT_FAILURE);
+        }
+    } else {
+        printf("File '%s' opened successfully.\n", filename);
     }
-
-    printf("File '%s' opened successfully.\n", filename);
 
     // Load the database from the file
     loadDatabase(&head, filename);
@@ -112,8 +124,6 @@ void saveDatabase(struct item *head, char *filename) {
     }
 
     fclose(file);
-
-
 }
 
 // Function to display the main menu and handle user input
@@ -296,5 +306,3 @@ void displayInventory(struct item *head) {
         current = current->next;
     }
 }
-
-
